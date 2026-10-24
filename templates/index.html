@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titre %}Accueil{% endblock %}
+
+{% block contenu %}
+<section class="hero">
+  <div class="hero__texte">
+    <p class="surtitre">Lycée technique — Année scolaire 2026-2027</p>
+    <h1>Le portail de notes du lycée</h1>
+    <p class="hero__intro">Fini les moyennes calculées à la main : les enseignants saisissent les notes,
+      Note View calcule automatiquement les moyennes coefficientées et les rangs,
+      et chaque élève consulte son bulletin en ligne.</p>
+    <div class="hero__actions">
+      <a class="bouton bouton--principal" href="{{ url_for('connexion') }}">Je suis élève</a>
+      <a class="bouton bouton--secondaire" href="{{ url_for('connexion_enseignant') }}">Je suis enseignant</a>
+    </div>
+  </div>
+  <img class="hero__image" src="{{ url_for('static', filename='images/illustration_bulletin.svg') }}"
+       alt="Illustration d'un bulletin de notes et d'un graphique d'évolution des moyennes" width="400" height="300">
+</section>
+
+<section class="grille-cartes" aria-labelledby="titre-fonctions">
+  <h2 id="titre-fonctions" class="grille-cartes__titre">Ce que propose Note View</h2>
+  <article class="carte">
+    <h3>Bulletin par séquence</h3>
+    <p>Notes par matière, coefficients, moyenne coefficientée, rang dans la classe et appréciation.</p>
+  </article>
+  <article class="carte">
+    <h3>Suivi de la progression</h3>
+    <p>Historique des moyennes et des rangs, avec un graphique d'évolution séquence après séquence.</p>
+  </article>
+  <article class="carte">
+    <h3>Saisie rapide</h3>
+    <p>Une page par matière et par classe, contrôle immédiat des notes et moyenne calculée en direct.</p>
+  </article>
+  <article class="carte">
+    <h3>Statistiques</h3>
+    <p>Taux de réussite, moyennes par matière, trois premiers de chaque classe et répartition des moyennes.</p>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,188 @@
+/* ==========================================================================
+   Note View - Feuille de style pour l'impression (A4)
+   Active uniquement lors de l'impression (@media print).
+   Masque tous les éléments d'interface (menus, boutons, formulaires)
+   et formate le bulletin pour une impression officielle et propre.
+   ========================================================================== */
+
+@media print {
+  /* Réinitialisation générale pour le papier */
+  *, *::before, *::after {
+    background: transparent !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    font-size: 11pt;
+    line-height: 1.35;
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Masquage de l'interface non imprimable */
+  .entete,
+  .pied,
+  .sans-impression,
+  .barre-page,
+  .navigation,
+  .flashs,
+  .fil-ariane,
+  .onglets,
+  .barre-envoi,
+  .corrections,
+  .lien-evitement,
+  button,
+  .bouton,
+  form,
+  .panneau-connexion__lien {
+    display: none !important;
+  }
+
+  /* Conteneur et mise en page plein format */
+  .conteneur, .principal {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Cadre du bulletin */
+  .bulletin {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 1.2cm !important;
+    margin: 0 !important;
+  }
+
+  .bulletin__entete {
+    border-bottom: 2px solid #000000 !important;
+    padding-bottom: 0.8cm !important;
+    margin-bottom: 0.8cm !important;
+  }
+
+  .bulletin__entete h1 {
+    font-size: 18pt !important;
+    margin: 0.2cm 0 !important;
+    color: #000000 !important;
+  }
+
+  .surtitre {
+    font-size: 10pt !important;
+    font-weight: bold !important;
+    color: #333333 !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Bloc d'identité de l'élève */
+  .identite {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    border: 1px solid #000000 !important;
+    background: #f5f5f5 !important;
+    padding: 0.4cm !important;
+    gap: 0.3cm !important;
+    margin-top: 0.4cm !important;
+  }
+
+  .identite div {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .identite dt {
+    font-size: 8pt !important;
+    text-transform: uppercase !important;
+    color: #444444 !important;
+  }
+
+  .identite dd {
+    font-size: 10pt !important;
+    font-weight: bold !important;
+  }
+
+  /* Tableaux */
+  .tableau-defilant {
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    margin: 0.5cm 0 !important;
+  }
+
+  .tableau {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 9.5pt !important;
+  }
+
+  .tableau caption {
+    display: none !important;
+  }
+
+  .tableau th,
+  .tableau td {
+    border: 1px solid #000000 !important;
+    padding: 5px 7px !important;
+  }
+
+  .tableau thead th {
+    background-color: #e5e5e5 !important;
+    font-weight: bold !important;
+    text-align: left !important;
+  }
+
+  .tableau thead th.nombre {
+    text-align: right !important;
+  }
+
+  .tableau tfoot td,
+  .tableau tfoot th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold !important;
+    border-top: 2px solid #000000 !important;
+  }
+
+  /* Grille des résultats */
+  .resultats {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.4cm !important;
+    margin-top: 0.6cm !important;
+    page-break-inside: avoid !important;
+  }
+
+  .indicateur {
+    border: 1.5px solid #000000 !important;
+    padding: 0.3cm !important;
+    background: #ffffff !important;
+    text-align: center !important;
+  }
+
+  .indicateur--principal {
+    background: #e5e5e5 !important;
+  }
+
+  .indicateur__libelle {
+    font-size: 8pt !important;
+    color: #333333 !important;
+  }
+
+  .indicateur__valeur {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+  }
+
+  .formule {
+    font-size: 8.5pt !important;
+    margin-top: 0.3cm !important;
+    text-align: right !important;
+  }
+
+  /* Évite les coupures de page au milieu d'un tableau */
+  tr, img, article {
+    page-break-inside: avoid !important;
+  }
+}

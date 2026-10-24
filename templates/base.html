@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{% block description %}Note View : portail de notes du lycée technique. Les enseignants saisissent les notes, les élèves consultent leur bulletin.{% endblock %}">
+  <title>{% block titre %}Accueil{% endblock %} | Note View</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}" media="print">
+</head>
+<body>
+  <a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+
+  <header class="entete">
+    <div class="conteneur entete__barre">
+      <a class="marque" href="{{ url_for('accueil') }}">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo Note View" width="40" height="40">
+        <span class="marque__texte">Note View <small>Lycée technique</small></span>
+      </a>
+
+      <nav class="navigation" aria-label="Navigation principale">
+        <ul>
+          {% if role == 'eleve' %}
+            <li><a href="{{ url_for('bulletin') }}" {% if request.endpoint == 'bulletin' %}aria-current="page"{% endif %}>Mon bulletin</a></li>
+            <li><a href="{{ url_for('historique') }}" {% if request.endpoint == 'historique' %}aria-current="page"{% endif %}>Historique</a></li>
+            <li>
+              <form method="post" action="{{ url_for('deconnexion') }}" class="form-deconnexion">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="navigation__sortie navigation__bouton">Déconnexion</button>
+              </form>
+            </li>
+          {% elif role == 'enseignant' %}
+            <li><a href="{{ url_for('tableau_de_bord') }}" {% if request.endpoint in ('tableau_de_bord', 'saisie_notes', 'liste_classe') %}aria-current="page"{% endif %}>Tableau de bord</a></li>
+            <li><a href="{{ url_for('statistiques') }}" {% if request.endpoint == 'statistiques' %}aria-current="page"{% endif %}>Statistiques</a></li>
+            <li>
+              <form method="post" action="{{ url_for('deconnexion_enseignant') }}" class="form-deconnexion">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="navigation__sortie navigation__bouton">Déconnexion</button>
+              </form>
+            </li>
+          {% else %}
+            <li><a href="{{ url_for('accueil') }}" {% if request.endpoint == 'accueil' %}aria-current="page"{% endif %}>Accueil</a></li>
+            <li><a href="{{ url_for('connexion') }}" {% if request.endpoint == 'connexion' %}aria-current="page"{% endif %}>Espace élève</a></li>
+            <li><a href="{{ url_for('connexion_enseignant') }}" {% if request.endpoint == 'connexion_enseignant' %}aria-current="page"{% endif %}>Espace enseignant</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% if nom_utilisateur %}
+        <p class="entete__utilisateur">Connecté : <strong>{{ nom_utilisateur }}</strong></p>
+      {% endif %}
+    </div>
+  </header>
+
+  <main id="contenu" class="conteneur principal">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashs" role="status">
+          {% for categorie, message in messages %}
+            <p class="flash flash--{{ categorie }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block contenu %}{% endblock %}
+  </main>
+
+  <footer class="pied">
+    <div class="conteneur">
+      <p>&copy; 2026 Note View — Portail de notes du lycée technique.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block titre %}Tableau de bord enseignant{% endblock %}
+{% block description %}Tableau de bord de l'enseignant : matières, classes et avancement de la saisie des notes.{% endblock %}
+
+{% block contenu %}
+<h1>Tableau de bord</h1>
+<p class="intro">Choisissez une matière, une classe et une séquence pour saisir les notes.
+  Les pastilles indiquent l'avancement :
+  <span class="pastille pastille--complete">complet</span>
+  <span class="pastille pastille--partielle">partiel</span>
+  <span class="pastille pastille--vide">vide</span></p>
+
+<section aria-labelledby="titre-matieres">
+  <h2 id="titre-matieres">Mes matières</h2>
+  {% if not matieres %}
+    <p class="encart-vide">Aucune matière ne vous est attribuée.</p>
+  {% endif %}
+  <div class="grille-matieres">
+    {% for matiere in matieres %}
+      <article class="carte">
+        <h3>{{ matiere.nom }} <span class="badge">coef. {{ matiere.coefficient }}</span></h3>
+        <div class="tableau-defilant" role="region" aria-label="Saisie des notes de {{ matiere.nom }}" tabindex="0">
+          <table class="tableau tableau--compact">
+            <thead>
+              <tr>
+                <th scope="col">Classe</th>
+                <th scope="col">Séquences</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for classe in classes %}
+                <tr>
+                  <th scope="row">{{ classe.nom }}</th>
+                  <td>
+                    <ul class="liste-pastilles">
+                      {% for s in SEQUENCES %}
+                        {% set nombre = avancement.get((matiere.id, classe.id, s), 0) %}
+                        <li>
+                          <a class="pastille {% if classe.effectif and nombre >= classe.effectif %}pastille--complete{% elif nombre %}pastille--partielle{% else %}pastille--vide{% endif %}"
+                             href="{{ url_for('saisie_notes', matiere_id=matiere.id, classe_id=classe.id, sequence=s) }}">S{{ s }}<span class="visuellement-cache"> : séquence {{ s }}, {{ nombre }} note(s) sur {{ classe.effectif }}</span></a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section aria-labelledby="titre-classes">
+  <h2 id="titre-classes">Les classes</h2>
+  <div class="tableau-defilant" role="region" aria-labelledby="titre-classes" tabindex="0">
+    <table class="tableau">
+      <thead>
+        <tr>
+          <th scope="col">Classe</th>
+          <th scope="col">Filière</th>
+          <th scope="col" class="nombre">Effectif</th>
+          <th scope="col"><span class="visuellement-cache">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for classe in classes %}
+          <tr>
+            <th scope="row">{{ classe.nom }}</th>
+            <td>{{ classe.filiere }}</td>
+            <td class="nombre">{{ classe.effectif }} / {{ classe.effectif_max }}</td>
+            <td><a href="{{ url_for('liste_classe', classe_id=classe.id) }}">Moyennes et rangs</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a class="bouton bouton--secondaire" href="{{ url_for('statistiques') }}">Voir les statistiques du lycée</a></p>
+</section>
+{% endblock %}

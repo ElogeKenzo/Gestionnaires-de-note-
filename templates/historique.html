@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titre %}Historique de mes résultats{% endblock %}
+{% block description %}Moyenne et rang de chaque séquence, avec le graphique d'évolution.{% endblock %}
+
+{% block contenu %}
+<h1>Historique de mes résultats</h1>
+<p class="intro">{{ eleve.nom }} {{ eleve.prenom }} — {{ eleve.matricule }} — {{ eleve.classe }}</p>
+
+{% if evolution %}
+  <div class="disposition-deux">
+    <div class="tableau-defilant" role="region" aria-labelledby="titre-historique" tabindex="0">
+      <table class="tableau">
+        <caption id="titre-historique">Moyenne et rang par séquence</caption>
+        <thead>
+          <tr>
+            <th scope="col">Séquence</th>
+            <th scope="col" class="nombre">Moyenne /20</th>
+            <th scope="col" class="nombre">Rang</th>
+            <th scope="col">Appréciation</th>
+            <th scope="col"><span class="visuellement-cache">Lien vers le bulletin</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ligne in evolution %}
+            <tr>
+              <th scope="row">Séquence {{ ligne.sequence }}</th>
+              <td class="nombre">{{ ligne.moyenne|note }}</td>
+              <td class="nombre">{{ ligne.rang|rang }} / {{ ligne.effectif }}{% if ligne.ex_aequo %} <small>(ex æquo)</small>{% endif %}</td>
+              <td>{{ ligne.moyenne|appreciation }}</td>
+              <td><a href="{{ url_for('bulletin', sequence=ligne.sequence) }}">Voir le bulletin</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <section class="carte carte--graphique" aria-labelledby="titre-graphique">
+      <h2 id="titre-graphique">Évolution de ma moyenne</h2>
+      <div class="graphique">
+        <canvas id="graphique-evolution" role="img"
+                aria-label="Graphique de l'évolution de la moyenne par séquence">
+          Votre navigateur ne peut pas afficher le graphique : consultez le tableau.
+        </canvas>
+      </div>
+      <p class="message-champ" id="erreur-graphique" aria-live="polite"></p>
+    </section>
+  </div>
+{% else %}
+  <p class="encart-vide">Aucune note n'a encore été saisie.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if evolution %}
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/evolution.js') }}" defer></script>
+{% endif %}
+{% endblock %}

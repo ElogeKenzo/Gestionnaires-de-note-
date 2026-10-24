@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titre %}Requête invalide{% endblock %}
+{% block description %}La requête n'a pas pu être traitée par le serveur.{% endblock %}
+
+{% block contenu %}
+<section class="page-erreur">
+  <p class="page-erreur__code" aria-hidden="true">400</p>
+  <h1>Requête invalide</h1>
+  <p>{{ description }}</p>
+  <a class="bouton bouton--principal" href="{{ url_for('accueil') }}">Retour à l'accueil</a>
+</section>
+{% endblock %}

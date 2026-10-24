@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titre %}{{ classe.nom }} — séquence {{ sequence }}{% endblock %}
+{% block description %}Moyennes et rangs des élèves de la classe {{ classe.nom }} pour la séquence {{ sequence }}.{% endblock %}
+
+{% block contenu %}
+<p class="fil-ariane"><a href="{{ url_for('tableau_de_bord') }}">Tableau de bord</a> › Liste de classe</p>
+<h1>{{ classe.nom }} <small class="sous-titre">{{ classe.filiere }}</small></h1>
+
+<div class="barre-page sans-impression">
+  <form class="selecteur" method="get" action="{{ url_for('liste_classe', classe_id=classe.id) }}">
+    <label for="choix-sequence">Séquence</label>
+    <select id="choix-sequence" name="sequence">
+      {% for s in SEQUENCES %}
+        <option value="{{ s }}" {% if s == sequence %}selected{% endif %}>Séquence {{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="bouton bouton--secondaire">Afficher</button>
+  </form>
+  <button type="button" class="bouton bouton--principal" data-action="imprimer">Imprimer la liste</button>
+</div>
+
+<section class="resultats" aria-label="Résumé de la classe">
+  <div class="indicateur indicateur--principal">
+    <p class="indicateur__libelle">Moyenne de la classe</p>
+    <p class="indicateur__valeur">{{ moyenne_classe|note }}<small>/20</small></p>
+  </div>
+  <div class="indicateur">
+    <p class="indicateur__libelle">Élèves classés</p>
+    <p class="indicateur__valeur">{{ effectif }}<small> / {{ resultats|length }}</small></p>
+  </div>
+  <div class="indicateur">
+    <p class="indicateur__libelle">Moyenne ≥ 10</p>
+    <p class="indicateur__valeur">{{ nb_reussite }}<small> élève(s)</small></p>
+  </div>
+</section>
+
+<div class="tableau-defilant" role="region" aria-labelledby="titre-liste" tabindex="0">
+  <table class="tableau">
+    <caption id="titre-liste">Classement de la séquence {{ sequence }}</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="nombre">Rang</th>
+        <th scope="col">Matricule</th>
+        <th scope="col">Nom et prénom</th>
+        <th scope="col" class="nombre">Moyenne /20</th>
+        <th scope="col">Appréciation</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in resultats %}
+        <tr>
+          <td class="nombre">{{ r.rang|rang }}{% if r.ex_aequo %} <small>ex æquo</small>{% endif %}</td>
+          <td>{{ r.matricule }}</td>
+          <th scope="row">{{ r.nom }} {{ r.prenom }}</th>
+          <td class="nombre {% if r.moyenne is not none and r.moyenne < 10 %}texte-alerte{% endif %}">{{ r.moyenne|note }}</td>
+          <td>{{ r.moyenne|appreciation }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

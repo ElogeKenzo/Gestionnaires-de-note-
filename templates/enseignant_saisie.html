@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block titre %}Saisie — {{ matiere.nom }} — {{ classe.nom }} — séquence {{ sequence }}{% endblock %}
+{% block description %}Saisie des notes de {{ matiere.nom }} pour la classe {{ classe.nom }}, séquence {{ sequence }}.{% endblock %}
+
+{% block contenu %}
+<p class="fil-ariane"><a href="{{ url_for('tableau_de_bord') }}">Tableau de bord</a> › Saisie des notes</p>
+<h1>{{ matiere.nom }} — {{ classe.nom }}</h1>
+<p class="intro">Séquence {{ sequence }} · coefficient {{ matiere.coefficient }} · {{ eleves|length }} élèves.
+  Notes de 0 à 20 (virgule ou point accepté). Un champ vide n'enregistre rien et conserve la note existante.</p>
+
+<nav class="onglets" aria-label="Changer de séquence">
+  <ul>
+    {% for s in SEQUENCES %}
+      <li><a href="{{ url_for('saisie_notes', matiere_id=matiere.id, classe_id=classe.id, sequence=s) }}"
+             {% if s == sequence %}aria-current="page"{% endif %}>S{{ s }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+
+<form id="form-saisie" class="form-notes" method="post" novalidate
+      action="{{ url_for('saisie_notes', matiere_id=matiere.id, classe_id=classe.id, sequence=sequence) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="tableau-defilant" role="region" aria-labelledby="titre-saisie" tabindex="0">
+    <table class="tableau tableau--saisie">
+      <caption id="titre-saisie">Notes de la séquence {{ sequence }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">N°</th>
+          <th scope="col">Matricule</th>
+          <th scope="col">Nom et prénom</th>
+          <th scope="col">Note /20</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eleve in eleves %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ eleve.matricule }}</td>
+            <th scope="row"><label for="note-{{ eleve.id }}">{{ eleve.nom }} {{ eleve.prenom }}</label></th>
+            <td>
+              <input type="text" id="note-{{ eleve.id }}" name="note_{{ eleve.id }}"
+                     class="champ-note {% if eleve.id in erreurs %}champ--invalide{% endif %}"
+                     value="{{ valeurs[eleve.id] if eleve.id in valeurs else eleve.note|champ }}"
+                     inputmode="decimal" autocomplete="off" maxlength="6"
+                     aria-describedby="message-{{ eleve.id }}" {% if eleve.id in erreurs %}aria-invalid="true"{% endif %}>
+              <span class="message-champ" id="message-{{ eleve.id }}" aria-live="polite">{{ erreurs.get(eleve.id, '') }}</span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="barre-envoi">
+    <p class="moyenne-direct" aria-live="polite">
+      Moyenne de la classe dans cette matière : <strong id="moyenne-direct">—</strong>
+      <span id="nombre-notes"></span>
+    </p>
+    <p class="message-champ" id="message-formulaire" aria-live="polite"></p>
+    <button type="submit" id="bouton-enregistrer" class="bouton bouton--principal">Enregistrer les notes</button>
+  </div>
+</form>
+
+{% set notees = eleves|selectattr('note_id')|list %}
+{% if notees %}
+  <details class="corrections" id="corrections">
+    <summary>Corriger une note individuellement ({{ notees|length }} note(s) enregistrée(s))</summary>
+    <div class="tableau-defilant" role="region" aria-label="Correction individuelle des notes" tabindex="0">
+      <table class="tableau tableau--compact">
+        <thead>
+          <tr>
+            <th scope="col">Élève</th>
+            <th scope="col" class="nombre">Note actuelle</th>
+            <th scope="col">Nouvelle note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for eleve in notees %}
+            <tr>
+              <th scope="row">{{ eleve.nom }} {{ eleve.prenom }}</th>
+              <td class="nombre">{{ eleve.note|note }}</td>
+              <td>
+                <form class="form-notes form-correction" method="post" novalidate
+                      action="{{ url_for('corriger_note', note_id=eleve.note_id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <label class="visuellement-cache" for="correction-{{ eleve.note_id }}">Nouvelle note de {{ eleve.nom }} {{ eleve.prenom }}</label>
+                  <input type="text" id="correction-{{ eleve.note_id }}" name="note" class="champ-note"
+                         inputmode="decimal" autocomplete="off" maxlength="6" required
+                         aria-describedby="message-correction-{{ eleve.note_id }}">
+                  <button type="submit" class="bouton bouton--petit">Corriger</button>
+                  <span class="message-champ" id="message-correction-{{ eleve.note_id }}" aria-live="polite"></span>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/saisie.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block titre %}Bulletin de la séquence {{ sequence }}{% endblock %}
+{% block description %}Bulletin de notes de la séquence {{ sequence }} : notes, coefficients, moyenne et rang.{% endblock %}
+
+{% block contenu %}
+<div class="barre-page sans-impression">
+  <form class="selecteur" method="get" action="{{ url_for('bulletin') }}">
+    <label for="choix-sequence">Séquence</label>
+    <select id="choix-sequence" name="sequence">
+      {% for s in SEQUENCES %}
+        <option value="{{ s }}" {% if s == sequence %}selected{% endif %}>Séquence {{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="bouton bouton--secondaire">Afficher</button>
+  </form>
+  <button type="button" id="bouton-imprimer" class="bouton bouton--principal" data-action="imprimer">Imprimer le bulletin</button>
+</div>
+
+<article class="bulletin">
+  <header class="bulletin__entete">
+    <div>
+      <p class="surtitre">Lycée technique — Bulletin de notes</p>
+      <h1>Bulletin de la séquence {{ sequence }}</h1>
+    </div>
+    <dl class="identite">
+      <div><dt>Élève</dt><dd>{{ eleve.nom }} {{ eleve.prenom }}</dd></div>
+      <div><dt>Matricule</dt><dd>{{ eleve.matricule }}</dd></div>
+      <div><dt>Classe</dt><dd>{{ eleve.classe }}</dd></div>
+      <div><dt>Filière</dt><dd>{{ eleve.filiere }}</dd></div>
+      <div><dt>Né(e) le</dt><dd>{{ eleve.date_naissance.split('-')|reverse|join('/') }}</dd></div>
+    </dl>
+  </header>
+
+  {% if resultat.moyenne is none %}
+    <p class="encart-vide">Aucune note n'a encore été saisie pour la séquence {{ sequence }}.</p>
+  {% else %}
+    <div class="tableau-defilant" role="region" aria-labelledby="titre-notes" tabindex="0">
+      <table class="tableau">
+        <caption id="titre-notes">Notes de la séquence {{ sequence }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Matière</th>
+            <th scope="col">Enseignant</th>
+            <th scope="col" class="nombre">Note /20</th>
+            <th scope="col" class="nombre">Coef.</th>
+            <th scope="col" class="nombre">Points</th>
+            <th scope="col">Appréciation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ligne in lignes %}
+            <tr>
+              <th scope="row">{{ ligne.matiere }}</th>
+              <td>{{ ligne.enseignant }}</td>
+              <td class="nombre {% if ligne.note is not none and ligne.note < 10 %}texte-alerte{% endif %}">{{ ligne.note|note }}</td>
+              <td class="nombre">{{ ligne.coefficient }}</td>
+              <td class="nombre">{% if ligne.note is not none %}{{ (ligne.note * ligne.coefficient)|note }}{% else %}—{% endif %}</td>
+              <td>{% if ligne.note is not none %}{{ ligne.note|appreciation }}{% else %}Non noté{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="3">Total</th>
+            <td class="nombre">{{ total_coefficients }}</td>
+            <td class="nombre">{{ total_points|note }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <section class="resultats" aria-label="Résultats de la séquence">
+      <div class="indicateur indicateur--principal">
+        <p class="indicateur__libelle">Moyenne coefficientée</p>
+        <p class="indicateur__valeur">{{ resultat.moyenne|note }}<small>/20</small></p>
+      </div>
+      <div class="indicateur">
+        <p class="indicateur__libelle">Rang</p>
+        <p class="indicateur__valeur">{{ resultat.rang|rang }}<small> / {{ effectif }}</small></p>
+        {% if resultat.ex_aequo %}<p class="indicateur__note">ex æquo</p>{% endif %}
+      </div>
+      <div class="indicateur">
+        <p class="indicateur__libelle">Appréciation</p>
+        <p class="indicateur__valeur indicateur__valeur--texte">{{ resultat.moyenne|appreciation }}</p>
+      </div>
+      <div class="indicateur">
+        <p class="indicateur__libelle">Classe</p>
+        <p class="indicateur__detail">Moyenne : <strong>{{ moyenne_classe|note }}</strong></p>
+        <p class="indicateur__detail">Plus forte : {{ moyenne_max|note }} · Plus faible : {{ moyenne_min|note }}</p>
+      </div>
+    </section>
+    <p class="formule">Calcul : {{ total_points|note }} points ÷ {{ total_coefficients }} coefficients = {{ resultat.moyenne|note }}/20</p>
+  {% endif %}
+</article>
+{% endblock %}

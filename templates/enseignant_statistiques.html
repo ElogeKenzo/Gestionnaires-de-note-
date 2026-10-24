@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block titre %}Statistiques — séquence {{ sequence }}{% endblock %}
+{% block description %}Statistiques du lycée technique pour la séquence {{ sequence }} : moyennes générales, taux de réussite, moyennes par matière, trois premiers et répartition par tranches.{% endblock %}
+
+{% block contenu %}
+<p class="fil-ariane"><a href="{{ url_for('tableau_de_bord') }}">Tableau de bord</a> › Statistiques</p>
+<h1>Statistiques générales du lycée</h1>
+
+<div class="barre-page sans-impression">
+  <form class="selecteur" method="get" action="{{ url_for('statistiques') }}">
+    <label for="choix-sequence">Séquence</label>
+    <select id="choix-sequence" name="sequence">
+      {% for s in SEQUENCES %}
+        <option value="{{ s }}" {% if s == sequence %}selected{% endif %}>Séquence {{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="bouton bouton--secondaire">Afficher</button>
+  </form>
+  <button type="button" class="bouton bouton--principal" data-action="imprimer">Imprimer les statistiques</button>
+</div>
+
+<!-- 1. Moyenne générale et taux de réussite par classe -->
+<section class="section-stat" aria-labelledby="titre-stat-reussite">
+  <h2 id="titre-stat-reussite">1. Moyenne générale et taux de réussite par classe</h2>
+  <div class="tableau-defilant" role="region" aria-labelledby="titre-stat-reussite" tabindex="0">
+    <table class="tableau">
+      <thead>
+        <tr>
+          <th scope="col">Classe</th>
+          <th scope="col">Filière</th>
+          <th scope="col" class="nombre">Effectif évalué</th>
+          <th scope="col" class="nombre">Moyenne générale</th>
+          <th scope="col" class="nombre">Admis (moy. ≥ 10)</th>
+          <th scope="col" class="nombre">Taux de réussite</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in stats.reussite_par_classe %}
+          <tr>
+            <th scope="row"><a href="{{ url_for('liste_classe', classe_id=c.classe_id, sequence=sequence) }}">{{ c.classe }}</a></th>
+            <td>{{ c.filiere }}</td>
+            <td class="nombre">{{ c.effectif }}</td>
+            <td class="nombre {% if c.moyenne_generale and c.moyenne_generale < 10 %}texte-alerte{% endif %}"><strong>{{ c.moyenne_generale|note }}</strong>/20</td>
+            <td class="nombre">{{ c.nb_reussite }}</td>
+            <td class="nombre">
+              <span class="badge {% if c.taux_reussite >= 50 %}badge--succes{% else %}badge--alerte{% endif %}">{{ c.taux_reussite }} %</span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 2. Moyenne de chaque matière par classe -->
+<section class="section-stat" aria-labelledby="titre-stat-matieres">
+  <h2 id="titre-stat-matieres">2. Moyenne de chaque matière par classe</h2>
+  <div class="tableau-defilant" role="region" aria-labelledby="titre-stat-matieres" tabindex="0">
+    <table class="tableau tableau--compact">
+      <thead>
+        <tr>
+          <th scope="col">Matière</th>
+          <th scope="col" class="nombre">Coef.</th>
+          {% for cl in classes %}
+            <th scope="col" class="nombre">{{ cl.nom }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in matieres %}
+          <tr>
+            <th scope="row">{{ m.nom }}</th>
+            <td class="nombre">{{ m.coefficient }}</td>
+            {% for cl in classes %}
+              {% set val = moy_mat.get((cl.id, m.id)) %}
+              <td class="nombre {% if val is not none and val < 10 %}texte-alerte{% endif %}">{{ val|note }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 3. Les 3 premiers de chaque classe -->
+<section class="section-stat" aria-labelledby="titre-stat-podium">
+  <h2 id="titre-stat-podium">3. Les 3 premiers élèves de chaque classe</h2>
+  <div class="grille-podiums">
+    {% for nom_classe, laureats in stats.trois_premiers.items() %}
+      <article class="carte">
+        <h3>{{ nom_classe }}</h3>
+        {% if laureats %}
+          <ol class="liste-laureats">
+            {% for l in laureats %}
+              <li>
+                <div class="laureat-ligne">
+                  <span class="laureat-rang">{{ l.rang|rang }}{% if l.ex_aequo %} <small>(ex.)</small>{% endif %}</span>
+                  <div class="laureat-info">
+                    <strong>{{ l.nom }} {{ l.prenom }}</strong>
+                    <span class="laureat-matricule">{{ l.matricule }}</span>
+                  </div>
+                  <span class="laureat-moyenne">{{ l.moyenne|note }}/20</span>
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="encart-vide">Aucun élève classé.</p>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 4. Répartition des moyennes par tranches -->
+<section class="section-stat" aria-labelledby="titre-stat-tranches">
+  <h2 id="titre-stat-tranches">4. Répartition des moyennes par tranches</h2>
+  <div class="tableau-defilant" role="region" aria-labelledby="titre-stat-tranches" tabindex="0">
+    <table class="tableau">
+      <thead>
+        <tr>
+          <th scope="col">Classe</th>
+          <th scope="col" class="nombre">&lt; 8/20</th>
+          <th scope="col" class="nombre">8 à 10</th>
+          <th scope="col" class="nombre">10 à 12</th>
+          <th scope="col" class="nombre">12 à 14</th>
+          <th scope="col" class="nombre">&gt; 14/20</th>
+          <th scope="col" class="nombre">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in stats.tranches_par_classe %}
+          <tr>
+            <th scope="row">{{ t.classe }}</th>
+            <td class="nombre texte-alerte"><strong>{{ t.moins_de_8 }}</strong></td>
+            <td class="nombre">{{ t.de_8_a_10 }}</td>
+            <td class="nombre">{{ t.de_10_a_12 }}</td>
+            <td class="nombre">{{ t.de_12_a_14 }}</td>
+            <td class="nombre texte-succes"><strong>{{ t.plus_de_14 }}</strong></td>
+            <td class="nombre"><strong>{{ t.total }}</strong></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

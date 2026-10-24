@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titre %}Connexion élève{% endblock %}
+{% block description %}Connexion à l'espace élève de Note View avec votre matricule et votre code personnel.{% endblock %}
+
+{% block contenu %}
+<section class="panneau-connexion">
+  <h1>Espace élève</h1>
+  <p>Connectez-vous avec votre matricule et le code personnel à 4 chiffres remis par l'administration.</p>
+
+  <form id="form-connexion-eleve" class="formulaire" method="post" action="{{ url_for('connexion') }}"
+        novalidate data-validation="eleve">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="champ">
+      <label for="matricule">Matricule</label>
+      <input type="text" id="matricule" name="matricule" value="{{ matricule }}" maxlength="8"
+             autocomplete="username" placeholder="ex : 24GI0001" aria-describedby="erreur-matricule" required>
+      <p class="message-champ" id="erreur-matricule" aria-live="polite"></p>
+    </div>
+    <div class="champ">
+      <label for="code">Code personnel</label>
+      <input type="password" id="code" name="code" maxlength="4" inputmode="numeric"
+             autocomplete="current-password" aria-describedby="erreur-code" required>
+      <p class="message-champ" id="erreur-code" aria-live="polite"></p>
+    </div>
+    <button type="submit" id="bouton-connexion-eleve" class="bouton bouton--principal bouton--large">Se connecter</button>
+  </form>
+  <p class="panneau-connexion__lien">Vous êtes enseignant ? <a href="{{ url_for('connexion_enseignant') }}">Espace enseignant</a></p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/connexion.js') }}" defer></script>
+{% endblock %}

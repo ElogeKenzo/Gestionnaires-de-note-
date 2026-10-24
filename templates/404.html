@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titre %}Page introuvable{% endblock %}
+{% block description %}La page demandée n'existe pas sur le portail Note View.{% endblock %}
+
+{% block contenu %}
+<section class="page-erreur">
+  <p class="page-erreur__code" aria-hidden="true">404</p>
+  <h1>Page introuvable</h1>
+  <p>L'adresse demandée n'existe pas ou la ressource a été supprimée.</p>
+  <a class="bouton bouton--principal" href="{{ url_for('accueil') }}">Retour à l'accueil</a>
+</section>
+{% endblock %}

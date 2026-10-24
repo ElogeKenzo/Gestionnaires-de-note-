@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="titre-logo">
+  <title id="titre-logo">Note View</title>
+  <defs>
+    <linearGradient id="fond-logo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f3a68"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#fond-logo)"/>
+  <path d="M18 46V18h6l16 18V18h6v28h-6L24 28v18z" fill="#ffffff"/>
+  <circle cx="48" cy="48" r="7" fill="#f2b84b"/>
+  <path d="M45 48l2 2 4-4" stroke="#1f3a68" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
